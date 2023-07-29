@@ -42,7 +42,7 @@ function print_help() {
         (--dry-run)\n\
             Preview your changes. Nothing will be modified\n\
         (-d | --padding) number\n\
-            How may zeros to be pad the sequence with. If omittited it will be generated\n\
+            How may zeros to pad the sequence with. If omittited it will be generated\n\
         (-i | --ignore-extension)\n\
             Extensions will be ignored"
 }
