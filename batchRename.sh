@@ -196,6 +196,7 @@ for item in "$@"; do
             if [ $? -eq 0 ]; then
                 if [ $EXTIGNORE -eq 1 ]; then
                     newname="$newname.$ext"
+                    item="$item"".$ext"
                 fi
 
                 if [ $DRYRUN -eq 0 ]; then
@@ -219,6 +220,7 @@ for item in "$@"; do
             if [ $? -eq 0 ]; then
                 if [ $EXTIGNORE -eq 1 ]; then
                         newname="$newname.$ext"
+                        item="$item"".$ext"
                 fi
 
                 if [ $DRYRUN -eq 0 ]; then
