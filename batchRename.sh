@@ -8,6 +8,45 @@ DIGITS=0
 DRYRUN=0
 EXTIGNORE=0
 
+function print_help() {
+    echo \
+    "brename: Batch RENAME utility\n\
+    Requires at least 1 method to be specified: Sequence or regex (--seq or --regex)\n\
+    \n\
+    usage: batchRename.sh [options] [file1 file2 file3 ...]\n\n\
+    Example: batchRename.sh --seq 1 --dry-run file1.txt file2.txt file3.txt\n\
+        file1 -> file11.txt\n\
+        file2 -> file22.txt\n\
+        file3 -> file33.txt\n\
+    \n\
+    Example: batchRename.sh --regex '([a-z]+)([0-9]+)' --format 'Renamed_%1_%2.png' --dry-run file1.txt file2.txt file3.txt\n\
+        file1.txt -> Renamed_file_1.png\n\
+        file2.txt -> Renamed_file_2.png\n\
+        file3.txt -> Renamed_file_3.png\n\
+    \n\
+    Options:\n\
+        (-s | --seq) number\n\
+            Rename using numerical sequence. By default it will be appended\n\
+        (-r | --regex) pattern\n\
+            Captures values from the files and uses its values to rename\n\
+            Must use capture groups with (). Each corresponding groups are assigned to tags\n\
+              chronologically. ie: (group1)(group2)(group3) -> %1 %2 %3 respectively\n\
+        (-f | --format) format\n\
+            Format of each files will use for renaming.\n\
+            Requires at least 1 tag. ie: %1\n\
+            Example: renamed_file_%1.txt\n\
+        (-a | --append)\n\
+            Appends the sequence or values to the end of the file name\n\
+        (-p | --prepend)\n\
+            Prepends the sequence or values to the beginning of the file\n\
+        (--dry-run)\n\
+            Preview your changes. Nothing will be modified\n\
+        (-d | --padding) number\n\
+            How may zeros to be pad the sequence with. If omittited it will be generated\n\
+        (-i | --ignore-extension)\n\
+            Extensions will be ignored"
+}
+
 # FUNCTIONS USED FOR THIS SCRIPT
 function regex_rename() {
     # Takes a regex pattern as 1st parameter, output format as 2nd and the filename as the 3rd
@@ -38,8 +77,10 @@ function regex_rename() {
 }
 
 function sub_rename() {
-    #sub_rename val format
-    tagcount=$(grep -c '%1' <<< $2)
+    # $1: Value to replace with
+    # $2: Format to be placed. Will replace %1 tag
+    # sub_rename val format
+    tagcount=$(grep -o '%1' <<< $2 | wc -l)
     if [ $tagcount -lt 1 ]; then
         echo 'Format is missing tags'
         return 1
@@ -52,7 +93,7 @@ function sub_rename() {
 
 
 function remove_extension() {
-    echo $1 | sed "s/\.[^.]*$"//
+    echo $1 | sed "s/\.[^.]*$//"
     return 1
 }
 
@@ -64,7 +105,8 @@ function get_extension() {
 # * You can only specify a sequence or regex, but not both. Exits otherwise
 while [ $# -gt 0 ]; do
     case "$1" in
-        -s | --seq)
+        -s | --seq) # Sequence method
+            # Make sure starting index is good
             if ! [ -z $METHOD ]; then
                 echo "You cannot use modes Sequence and Regex together"
                 exit 1
@@ -78,7 +120,7 @@ while [ $# -gt 0 ]; do
             shift 2
             echo "Sequence starting at $STARTINDEX"
             ;;
-        -r | --regex)
+        -r | --regex) # Regex Method
             if ! [ -z $METHOD ]; then
                     echo "You cannot use modes Sequence and Regex together"
                     exit 1
@@ -86,12 +128,12 @@ while [ $# -gt 0 ]; do
             METHOD='r'
             PATTERN="$2"
 
+            # Make sure regex is good
             opencap=$(grep -o '(' <<< $PATTERN | wc -l)
             if ! [ $opencap -ge 1 ]; then
                 echo "You must use regex capture groups"
                 exit 1
             fi
-
             closecap=$(grep -o ')' <<< $PATTERN | wc -l)
             if [ $opencap -ne $closecap ]; then
                 echo "Unterminated capture group"
@@ -127,7 +169,7 @@ while [ $# -gt 0 ]; do
             shift 2
             echo "Using format $FORMAT"
             ;;
-        -p | --padding)
+        -d | --padding)
             if ! [[ $2 =~ '^[0-9]+$' ]]; then
                 echo 'Padding must be a number'
                 exit 1
@@ -140,6 +182,10 @@ while [ $# -gt 0 ]; do
             EXTIGNORE=1
             shift
             echo 'Extensions are ignored'
+            ;;
+        -h | --help)
+            print_help
+            exit 0
             ;;
         *)
             break
