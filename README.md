@@ -6,7 +6,7 @@ Command line shell utility to quickly rename a bunch of files. Supports sequenti
   - Rename using numerical sequence. By default it will be appended
 - `(-r | --regex) pattern`
   - Captures values from the files and uses its values to rename
-  - Must use capture groups with (). Each corresponding groups are assigned to tags chronologically. ie: (group1)(group2)(group3) -> %1 %2 %3 respectively
+  - Must use capture groups with `()`. Each corresponding groups are assigned to tags chronologically. ie: `(group1)(group2)(group3)` -> `%1 %2 %3` respectively
 - `(-f | --format) format`
   - Format of each files will use for renaming.
   - Requires at least 1 tag. ie: %1
